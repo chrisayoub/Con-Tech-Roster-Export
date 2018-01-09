@@ -10,6 +10,14 @@
   "content_security_policy": "script-src 'self' https://*.google.com; object-src 'self'",
   "permissions": [
     "cookies",
-    "https://www.shiftboard.com/"
-  ]
+    "https://www.shiftboard.com/",
+    "identity",
+    "identity.email"
+  ],
+  "oauth2": {
+    "client_id": "996467658815-0ju2ks90v18ta5ng088uscnbodeou5ju.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive"
+    ]
+  }
 }

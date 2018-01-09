@@ -23,6 +23,10 @@ function doShiftboardLogin() {
     chrome.tabs.create({url: 'https://www.shiftboard.com/sxsw/'}, null);
 }
 
+function getDriveToken(interactive, callbackFunc) {
+    chrome.identity.getAuthToken({ 'interactive': interactive }, callbackFunc);
+}
+
 function getDateStr(date) {
     var year = date.getFullYear();
 
@@ -34,6 +38,37 @@ function getDateStr(date) {
 
     return year + month + day;
 }
+
+function showDriveAuthDetails(interactive) {
+    getDriveToken(interactive, function(token) {
+        if (token != null) {
+            var nameToSet = document.getElementById('accountName');
+            chrome.identity.getProfileUserInfo(function (userInfo) {
+                nameToSet.innerHTML = userInfo.email;
+                // Show the account info
+                // document.getElementById('revokeAuth').style.display = 'inline';
+                document.getElementById('driveAccountInfo').style.display = null;
+            });
+        } else {
+
+        }
+        console.log(token);
+    });
+}
+
+// function revokeDriveAuth() {
+//     getDriveToken(false, function(token) {
+//         if (token != null) {
+//             console.log('token')
+//             console.log(token)
+//             chrome.identity.removeCachedAuthToken({'token' : token}, function() {
+//                 // Hide UI elements
+//                 document.getElementById('revokeAuth').style.display = 'none';
+//                 document.getElementById('driveAccountInfo').style.display = 'none';
+//             });
+//         }
+//     });
+// }
 
 // Sets up the UI buttons
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,11 +82,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // TODO: check for Google Drive login
+    // Check if authorized with Drive
+    // Will not show authorization if authorized
+    showDriveAuthDetails(false);
 
     // Initalize buttons
-    var button = document.getElementById('btn');
-    button.addEventListener('click', () => {
+    document.getElementById('export').addEventListener('click', () => {
         // Check for a valid date
         var date = $('#datepicker').datepicker( "getDate" );
         if (date != null) {
@@ -61,10 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    var shiftboard = document.getElementById('shiftboard');
-    shiftboard.addEventListener('click', () => {
-      doShiftboardLogin();
+    document.getElementById('shiftboard').addEventListener('click', () => {
+        doShiftboardLogin();
     });
+
+    document.getElementById('driveAuthBtn').addEventListener('click', () => {
+        showDriveAuthDetails(true);
+    });
+
+    // document.getElementById('revokeAuth').addEventListener('click', () => {
+    //     revokeDriveAuth();
+    // });
 
     // Initalize date picker
     $('#datepicker').datepicker();
