@@ -1,7 +1,8 @@
+// Generates spreadsheet object for Sheets from raw data
 function generateSpreadsheet(reportData) {
 	var matrix = dataToMatrix(reportData);
 	var newMatrix = formatMatrix(matrix);
-	console.log(newMatrix);
+	return createUploadObject(newMatrix);
 }
 
 // Parses the data into a 2D array, ignoring extra data.
@@ -43,7 +44,7 @@ Format:
 function formatMatrix(matrix) {
 	var newMatrix = []
 
-	let MAX_COL = 9;
+	let MAX_COL = 5;
 
 	// Create initial blank matrix
 	for (var i = 0; i < matrix.length; i++) {
@@ -73,10 +74,10 @@ function formatMatrix(matrix) {
 
 	// Manual header overrides
 	newMatrix[0][0] = 'Name';
-	newMatrix[0][5] = 'Arrive';
-	newMatrix[0][6] = 'Depart';
-	newMatrix[0][7] = 'No Show';
-	newMatrix[0][8] = 'Notes';
+	newMatrix[0].push('Arrive');
+	newMatrix[0].push('Depart');
+	newMatrix[0].push('No Show');
+	newMatrix[0].push('Notes');
 
 	// Temporarily remove the header
 	let header = newMatrix.shift();
@@ -120,16 +121,57 @@ function formatMatrix(matrix) {
 	return newMatrix;
 }
 
+// Copies a column from a source to a destination
 function copyColumn(src, dest, srcIndex, destIndex) {
 	for (var i = 0; i < src.length; i++) {
 		dest[i][destIndex] = src[i][srcIndex];
 	}
 }
 
+// Creates a blank row of specified length
 function getBlankRow(length) {
 	var row = [];
 	for (var i = 0; i < length; i++) {
 		row.push('');
 	}
 	return row;
+}
+
+// Returns a Set of unique locations to create Sheets for
+function getUniqueLocations(matrix) {
+	var locs = new Set();
+
+	var i = 1;
+	var role = matrix[i][1];
+	while (role !== 'Shift Leader') {
+		role = matrix[++i][1];
+	}
+
+	// Now on the Shift Leaders
+	while (role !== '') {
+		let fullLoc = matrix[i][2];
+		let loc = fullLoc.split(' - ')[0];
+		locs.add(loc);
+		role = matrix[++i][1];
+	}
+}
+
+// Returns the index of the first boundary in the full matrix.
+// This is the first 'blank row' index.
+function identifyFirstBoundary(matrix) {
+	var i = 1;
+	var role = matrix[i][1];
+	while (role !== '') {
+		role = matrix[++i][1];
+	}
+	return i;
+}
+
+// Creates object in correct format for Google Sheets
+function createUploadObject(matrix) {
+	let locs = getUniqueLocations(matrix);
+
+	result = { sheets : [] }
+	
+	console.log(result)
 }
