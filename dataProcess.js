@@ -25,8 +25,7 @@ function dataToMatrix(reportData) {
 Format:
 * Header: Name, Role, Location, Shift, Date, Arrive, Leave, No Show, Notes
 * Sorting of the rows: By Role, Location, and finally by Name
-* Inject blank rows in-between major groups (CM, Ninja, Shift Leader, Volunteer)
-* Ignore rows with empty First Name cell (index 6)  */
+* Inject blank rows in-between major groups (CM, Ninja, Shift Leader, Volunteer) */
 function formatMatrix(matrix) {
 
 }
