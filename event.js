@@ -3,8 +3,8 @@ function getReportCsv(tgtDate) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            console.log(xhr.responseText);
             var data = xhr.responseText;
+            generateSpreadsheet(data);
         }        
     };
     xhr.open("GET", url, true);
@@ -14,7 +14,7 @@ function getReportCsv(tgtDate) {
 function getReportUrl(tgtDate) {
     return 'https://www.shiftboard.com/servola/reporting/report.cgi?' + 
             'type=coverage&ss=298255&deleted_teams=2&covered=1&' + 
-            'format=comma_delimit&include=selected_fields&download=Download&' + 
+            'format=tab_delimited&include=selected_fields&download=Download&' + 
             'start_date=' + tgtDate + '&'
             'end_date=' + tgtDate
 }
@@ -52,7 +52,6 @@ function showDriveAuthDetails(interactive) {
         } else {
 
         }
-        console.log(token);
     });
 }
 

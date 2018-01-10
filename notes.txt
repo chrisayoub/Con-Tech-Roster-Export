@@ -1,0 +1,36 @@
+NOTES:
+Spreadsheet name: Rosters - Sun 3/12 (if it is for Sunday 3/12)
+
+Ignore rows with empty First Name cell
+Only include columns 1 through 5 (excluding 0 and 6+)
+
+Change "Account" in header to say "Name" (index 5)
+
+Put the 5th indexed col to be the at the beginning
+Then, put the 3rd indexed col
+Then, put the 2nd indexed col
+Then, put the 4th indexed col
+Then, put the 1st indexed col
+
+Header to append (empty col):
+Arrive, Depart, No Show, Notes
+
+Sort by Role, then by Location, and then sort by Name (Account)
+
+Add blank rows in between major groups 
+  -Order = (CM, Ninja, Shift Leader, Volunteer)
+
+^^^^Do this in "Master" sheet first
+
+Then, split into venue sheets based on "Location" (but, include CMs in all sheets)
+
+
+Destination Folder:
+
+SXSW MASTER -> (year) -> Rosters -> Daily -> (event) 
+
+example: SXSW MASTER -> 2017 -> Rosters -> Daily -> EDU
+example: SXSW MASTER -> 2017 -> Rosters -> Daily -> INTERACTIVE
+example: SXSW MASTER -> 2017 -> Rosters -> Daily -> MUSIC
+
+Hardcode the dates of the three events to know the destination folder, default to just in "Daily"
