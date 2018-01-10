@@ -15,7 +15,7 @@ function getReportUrl(tgtDate) {
     return 'https://www.shiftboard.com/servola/reporting/report.cgi?' + 
             'type=coverage&ss=298255&deleted_teams=2&covered=1&' + 
             'format=tab_delimited&include=selected_fields&download=Download&' + 
-            'start_date=' + tgtDate + '&'
+            'start_date=' + tgtDate + '&' +
             'end_date=' + tgtDate
 }
 
