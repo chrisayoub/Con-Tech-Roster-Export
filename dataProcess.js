@@ -43,12 +43,14 @@ Format:
 function formatMatrix(matrix) {
 	var newMatrix = []
 
+	let MAX_COL = 9;
+
 	// Create initial blank matrix
 	for (var i = 0; i < matrix.length; i++) {
 		var newRow = []
 		newMatrix.push(newRow)
 		// 9 total columns
-		for (var j = 0; j < 9; j++) {
+		for (var j = 0; j < MAX_COL; j++) {
 			newRow.push('');
 		}
 	}
@@ -103,7 +105,17 @@ function formatMatrix(matrix) {
 	// Add header back in
 	newMatrix.unshift(header);
 
-	// Inject blank rows
+	// Inject blank rows (at Role differences)
+	var currRole = newMatrix[1][1];
+	var indexToInsert = 2;
+	while (indexToInsert < newMatrix.length) {
+		let role = newMatrix[indexToInsert][1];
+		if (role !== currRole) {
+			currRole = role;
+			newMatrix.splice(indexToInsert, 0, getBlankRow(MAX_COL));
+		}
+		indexToInsert++;
+	}
 
 	return newMatrix;
 }
@@ -112,4 +124,12 @@ function copyColumn(src, dest, srcIndex, destIndex) {
 	for (var i = 0; i < src.length; i++) {
 		dest[i][destIndex] = src[i][srcIndex];
 	}
+}
+
+function getBlankRow(length) {
+	var row = [];
+	for (var i = 0; i < length; i++) {
+		row.push('');
+	}
+	return row;
 }
