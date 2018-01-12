@@ -1,11 +1,17 @@
 function getReportCsv(tgtDate) {
-    var url = getReportUrl(tgtDate);
+    var dateStr = getDateStr(tgtDate);
+    var url = getReportUrl(dateStr);
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            let data = xhr.responseText;
-            let objToUpload = generateSpreadsheet(data);
-            uploadSheet(objToUpload);
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                let data = xhr.responseText;
+                let objToUpload = generateSpreadsheet(data, tgtDate);
+                uploadSheet(objToUpload);
+            } else {
+                document.getElementById('error').innerHTML = 'Error: Could not get Shiftboard report.';
+                console.log(xhr.responseText);
+            }
         }        
     };
     xhr.open('GET', url, true);
@@ -18,11 +24,19 @@ function uploadSheet(spreadsheet) {
         url += '?access_token=' + token;
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                let result = JSON.parse(xhr.responseText);
-                console.log(result);
-                // Auto-resize cols
-                resizeCols(result, token);
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    let result = JSON.parse(xhr.responseText);
+                    // Auto-resize cols
+                    resizeCols(result, token);
+                    // Done!
+                    let link = result.spreadsheetUrl;
+                    var msg = 'Success! Link: <a href="' + link + '">' + link + '</a>';
+                    document.getElementById('error').innerHTML = msg;
+                } else {
+                    document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
+                    console.log(xhr.responseText);
+                }
             }        
         };
         xhr.open('POST', url, true);
@@ -58,6 +72,14 @@ function resizeCols(spreadsheetInfo, token) {
     }
 
     var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status !== 200) {
+                    document.getElementById('error').innerHTML = 'Error: Could not format Google Sheet.';
+                    console.log(xhr.responseText);
+                }
+            }        
+        };
     xhr.open('POST', url, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(payload));
@@ -143,8 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var date = $('#datepicker').datepicker( "getDate" );
         if (date != null) {
             // Get the report data
-            var dateStr = getDateStr(date);
-            getReportCsv(dateStr);
+            getReportCsv(date);
         }
     });
 

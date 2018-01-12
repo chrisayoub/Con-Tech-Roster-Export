@@ -1,8 +1,8 @@
 // Generates spreadsheet object for Sheets from raw data
-function generateSpreadsheet(reportData) {
+function generateSpreadsheet(reportData, tgtDate) {
 	var matrix = dataToMatrix(reportData);
 	var newMatrix = formatMatrix(matrix);
-	return createUploadObject(newMatrix);
+	return createUploadObject(newMatrix, tgtDate);
 }
 
 // Parses the data into a 2D array, ignoring extra data.
@@ -242,14 +242,23 @@ function rowToSheetRow(matrix, rowIndex) {
 	return result;
 }
 
+// Get title for spreadsheet based on date
+function getTitle(tgtDate) {
+	var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	let day = days[ tgtDate.getDay() ];
+	let trueMonth = tgtDate.getMonth() + 1;
+	let title = 'Rosters - ' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
+	return title;
+}
+
 // Creates object in correct format for Google Sheets
-function createUploadObject(matrix) {
+function createUploadObject(matrix, tgtDate) {
 	let locs = getUniqueLocations(matrix);
 	let boundary = identifyFirstBoundary(matrix);
 
 	var result = { 
 		properties: {
-			title: "TODO: Implement this"
+			title: getTitle(tgtDate)
 		},
 		sheets: [] 
 	};
@@ -260,6 +269,5 @@ function createUploadObject(matrix) {
 	}
 	result.sheets.push(getMasterSheet(matrix));
 
-	console.log(result);
 	return result;
 }

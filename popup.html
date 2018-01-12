@@ -12,26 +12,28 @@
   <body>
     <h2>ConTech Roster Generator</h2>
 
-    <div id='shiftboardLogin'>
+    <div id="shiftboardLogin">
       <p>First, it looks like you need to login to Shiftboard. Click to login.</p>
       <button id="shiftboard">Login</button> 
     </div>
 
-    <div id='driveAuthoize'>
+    <div id="driveAuthoize">
       <p>If you have never authorized with Google Drive, click to authorize.</p>
 
       <button id="driveAuthBtn">Authorize</button>
-      <!-- <button id="revokeAuth" style='display: none'>Revoke</button> -->
+      <!-- <button id="revokeAuth" style="display: none">Revoke</button> -->
       
-      <div id='driveAccountInfo' style='display: none'>
+      <div id="driveAccountInfo" style="display: none">
         <p>Drive account: <b id="accountName"></b> </p>  
       </div>
     </div>
     
-    <div id='datePick' style="width: 250px">
+    <div id="datePick" style="width: 250px">
       <p>Now, select your date of roster export.</p>
       <input type="text" id="datepicker" style="width: 100px">
       <button id="export">Export</button> 
     </div>   
+
+    <p id="error" style="color: red; font-weight: bold;"></p>
   </body>
 </html>
