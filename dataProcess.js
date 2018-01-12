@@ -154,6 +154,8 @@ function getUniqueLocations(matrix) {
 		locs.add(loc);
 		role = matrix[++i][1];
 	}
+
+	return locs;
 }
 
 // Returns the index of the first boundary in the full matrix.
@@ -167,11 +169,97 @@ function identifyFirstBoundary(matrix) {
 	return i;
 }
 
+function getSheetTemplate() {
+	let sheet = {
+		properties: {
+			title: ''
+		},
+		data: [
+			{
+				startRow: 0,
+				startColumn: 0,
+				rowData: []
+			}
+		]
+	};
+	return sheet;
+}
+
+// Returns a Google Sheet for the specified
+// venue, including all CMs regardless
+// CMs are before the startIndex
+function getSheetForName(matrix, name, startIndex) {
+	var sheet = getSheetTemplate();
+	sheet.properties.title = name;
+	var rowData = sheet.data[0].rowData;
+
+	// CMs
+	for (var i = 0; i < startIndex; i++) {
+		rowData.push(rowToSheetRow(matrix, i));
+	}
+
+	// Now, based on venue
+	for (var i = startIndex; i < matrix.length; i++) {
+		let fullLoc = matrix[i][2];
+		let loc = fullLoc.split(' - ')[0];
+		if (loc === name || loc === '') {
+			rowData.push(rowToSheetRow(matrix, i));
+		}
+	}
+
+	return sheet;
+}
+
+function getMasterSheet(matrix) {
+	var sheet = getSheetTemplate();
+	sheet.properties.title = 'Master';
+	var rowData = sheet.data[0].rowData;
+
+	for (var i = 0; i < matrix.length; i++) {
+		rowData.push(rowToSheetRow(matrix, i));
+	}
+
+	return sheet;
+}
+
+// Returns a proper sheet row for the given index
+function rowToSheetRow(matrix, rowIndex) {
+	var result = {
+		values: []
+	};
+	var vals = result.values;
+
+	let row = matrix[rowIndex];
+	for (var i = 0; i < row.length; i++) {
+		var toAdd = {
+			userEnteredValue: {
+				stringValue: row[i]
+			}
+		};
+		vals.push(toAdd);
+	}
+
+	return result;
+}
+
 // Creates object in correct format for Google Sheets
 function createUploadObject(matrix) {
 	let locs = getUniqueLocations(matrix);
+	let boundary = identifyFirstBoundary(matrix);
 
-	result = { sheets : [] }
-	
-	console.log(result)
+	var result = { 
+		properties: {
+			title: "TODO: Implement this"
+		},
+		sheets: [] 
+	};
+
+	for (let loc of locs) {
+		let sheet = getSheetForName(matrix, loc, boundary);
+		result.sheets.push(sheet);
+	}
+	result.sheets.push(getMasterSheet(matrix));
+
+	console.log(result);
+	return result;
 }

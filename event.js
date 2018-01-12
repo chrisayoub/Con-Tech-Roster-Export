@@ -3,12 +3,64 @@ function getReportCsv(tgtDate) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            var data = xhr.responseText;
-            generateSpreadsheet(data);
+            let data = xhr.responseText;
+            let objToUpload = generateSpreadsheet(data);
+            uploadSheet(objToUpload);
         }        
     };
-    xhr.open("GET", url, true);
+    xhr.open('GET', url, true);
     xhr.send();
+}
+
+function uploadSheet(spreadsheet) {
+    getDriveToken(false, function(token) {
+        var url = 'https://sheets.googleapis.com/v4/spreadsheets';
+        url += '?access_token=' + token;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                let result = JSON.parse(xhr.responseText);
+                console.log(result);
+                // Auto-resize cols
+                resizeCols(result, token);
+            }        
+        };
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(spreadsheet));
+    });
+}
+
+function resizeCols(spreadsheetInfo, token) {
+    var url = 'https://sheets.googleapis.com/v4/spreadsheets/';
+    url += spreadsheetInfo.spreadsheetId + ':batchUpdate';
+    url += '?access_token=' + token;
+
+    var payload = {
+        requests: []
+    };
+
+    // Auto-resize for first five cols
+    let sheets = spreadsheetInfo.sheets;
+    for (let sheet of sheets) {
+        let sheetId = sheet.properties.sheetId;
+        let request = {
+            autoResizeDimensions: {
+                dimensions: {
+                    sheetId: sheetId,
+                    dimension: 'COLUMNS',
+                    startIndex: 0,
+                    endIndex: 4
+                }
+            }
+        };
+        payload.requests.push(request);
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify(payload));
 }
 
 function getReportUrl(tgtDate) {
