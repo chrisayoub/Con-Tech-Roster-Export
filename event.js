@@ -37,7 +37,11 @@ function uploadSheet(spreadsheet) {
                     // Done!
                     let link = result.spreadsheetUrl;
                     var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
-                    document.getElementById('error').innerHTML = msg;
+                    document.getElementById('link').innerHTML = msg;
+                    document.getElementById('error').innerHTML = '';
+                    document.getElementById('link').addEventListener('click', () => {
+                        chrome.tabs.create({ url: link });
+                    });
                 } else {
                     document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
                     console.log(xhr.responseText);
@@ -169,11 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initalize buttons
     document.getElementById('export').addEventListener('click', () => {
+        // Reset link field
+        document.getElementById('link').innerHTML = '';
         // Check for a valid date
         var date = $('#datepicker').datepicker( "getDate" );
         if (date != null) {
             // Get the report data
             getReportCsv(date);
+        } else {
+            document.getElementById('error').innerHTML = 'Invalid date entered.';
         }
     });
 
