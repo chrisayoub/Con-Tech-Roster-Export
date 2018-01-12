@@ -1,0 +1,16 @@
+h2 {
+    font-size: 14pt;
+}
+  
+p {
+    font-size: 12pt;
+}
+
+button {
+    font-size: 14px;
+}
+
+/* Sets the popup width */
+#datePick {
+	width: 400px;
+}

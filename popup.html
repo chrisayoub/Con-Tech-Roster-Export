@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="jquery-ui.min.css">
     <script src="jquery.min.js"></script>
     <script src="jquery-ui.min.js"></script>
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <h2>ConTech Roster Generator</h2>
@@ -18,17 +21,14 @@
     </div>
 
     <div id="driveAuthoize">
-      <p>If you have never authorized with Google Drive, click to authorize.</p>
+      <p>Be sure to login to the correct Google Drive account. 
+      You may change the current account if needed by clicking 'Logout'.</p>
 
-      <button id="driveAuthBtn">Authorize</button>
-      <!-- <button id="revokeAuth" style="display: none">Revoke</button> -->
-      
-      <div id="driveAccountInfo" style="display: none">
-        <p>Drive account: <b id="accountName"></b> </p>  
-      </div>
+      <button id="driveAuthBtn">Login</button>
+      <button id="revokeAuth" style="display: none">Logout</button>
     </div>
     
-    <div id="datePick" style="width: 250px">
+    <div id="datePick">
       <p>Now, select your date of roster export.</p>
       <input type="text" id="datepicker" style="width: 100px">
       <button id="export">Export</button> 

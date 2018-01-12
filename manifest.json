@@ -1,18 +1,19 @@
 {
-  "name": "ConTech",
-  "description" : "Base Level Extension",
+  "name": "ConTech Roster Generator",
+  "description" : "Generates ConTech rosters based on specified date.",
   "version": "1.0",
   "manifest_version": 2,
 
   "browser_action": {
     "default_popup": "popup.html"
   },
-  "content_security_policy": "script-src 'self' https://*.google.com; object-src 'self'",
   "permissions": [
     "cookies",
     "https://www.shiftboard.com/",
     "identity",
-    "identity.email"
+    "identity.email",
+    "https://accounts.google.com/",
+    "tabs"
   ],
   "oauth2": {
     "client_id": "996467658815-0ju2ks90v18ta5ng088uscnbodeou5ju.apps.googleusercontent.com",

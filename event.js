@@ -6,8 +6,13 @@ function getReportCsv(tgtDate) {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 let data = xhr.responseText;
-                let objToUpload = generateSpreadsheet(data, tgtDate);
-                uploadSheet(objToUpload);
+                // Check for present data
+                if (data.split('\n').length < 3) {
+                    document.getElementById('error').innerHTML = 'No data to export for this date.';
+                } else {
+                    let objToUpload = generateSpreadsheet(data, tgtDate);
+                    uploadSheet(objToUpload);
+                }       
             } else {
                 document.getElementById('error').innerHTML = 'Error: Could not get Shiftboard report.';
                 console.log(xhr.responseText);
@@ -31,7 +36,7 @@ function uploadSheet(spreadsheet) {
                     resizeCols(result, token);
                     // Done!
                     let link = result.spreadsheetUrl;
-                    var msg = 'Success! Link: <a href="' + link + '">' + link + '</a>';
+                    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
                     document.getElementById('error').innerHTML = msg;
                 } else {
                     document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
@@ -118,30 +123,33 @@ function showDriveAuthDetails(interactive) {
         if (token != null) {
             var nameToSet = document.getElementById('accountName');
             chrome.identity.getProfileUserInfo(function (userInfo) {
-                nameToSet.innerHTML = userInfo.email;
-                // Show the account info
-                // document.getElementById('revokeAuth').style.display = 'inline';
-                document.getElementById('driveAccountInfo').style.display = null;
+                // Switch the buttons
+                document.getElementById('revokeAuth').style.display = null;
+                document.getElementById('driveAuthBtn').style.display = 'none';
             });
-        } else {
-
+            document.getElementById('error').innerHTML = '';
         }
     });
 }
 
-// function revokeDriveAuth() {
-//     getDriveToken(false, function(token) {
-//         if (token != null) {
-//             console.log('token')
-//             console.log(token)
-//             chrome.identity.removeCachedAuthToken({'token' : token}, function() {
-//                 // Hide UI elements
-//                 document.getElementById('revokeAuth').style.display = 'none';
-//                 document.getElementById('driveAccountInfo').style.display = 'none';
-//             });
-//         }
-//     });
-// }
+function revokeDriveAuth() {
+    getDriveToken(false, function(token) {
+        if (token != null) {
+            chrome.identity.removeCachedAuthToken({ token: token });
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://accounts.google.com/o/oauth2/revoke?token=' + token);
+            xhr.send();
+            // Hide the UI
+            document.getElementById('revokeAuth').style.display = 'none';
+            document.getElementById('driveAuthBtn').style.display = null;
+            // Success!
+            document.getElementById('error').innerHTML = 'Successfully logged out of Drive.'
+        } else {
+            // Trying to revoke a null token!! Error
+            document.getElementById('error').innerHTML = 'Error: Cannot revoke null token.';
+        }
+    });
+}
 
 // Sets up the UI buttons
 document.addEventListener('DOMContentLoaded', () => {
@@ -177,9 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showDriveAuthDetails(true);
     });
 
-    // document.getElementById('revokeAuth').addEventListener('click', () => {
-    //     revokeDriveAuth();
-    // });
+    document.getElementById('revokeAuth').addEventListener('click', () => {
+        revokeDriveAuth();
+    });
 
     // Initalize date picker
     $('#datepicker').datepicker();
