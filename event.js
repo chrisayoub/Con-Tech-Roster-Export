@@ -35,10 +35,10 @@ function uploadSheet(spreadsheet) {
                     // Auto-resize cols
                     resizeCols(result, token);
                     // Done!
+                    document.getElementById('error').innerHTML = '';
                     let link = result.spreadsheetUrl;
                     var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
                     document.getElementById('link').innerHTML = msg;
-                    document.getElementById('error').innerHTML = '';
                     document.getElementById('link').addEventListener('click', () => {
                         chrome.tabs.create({ url: link });
                     });
