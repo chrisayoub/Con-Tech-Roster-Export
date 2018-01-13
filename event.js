@@ -126,7 +126,7 @@ function getReportUrl(tgtDate) {
 
 // Opens a tab for Shiftboard login
 function doShiftboardLogin() {
-    chrome.tabs.create({url: 'https://www.shiftboard.com/sxsw/'}, null);
+    chrome.tabs.create({url: 'https://www.shiftboard.com/sxsw/'});
 }
 
 // Gets a Drive auth token
