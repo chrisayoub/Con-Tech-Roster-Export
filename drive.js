@@ -55,10 +55,12 @@ function relocateFileToFolder(token, fileId, folderId) {
     url += fileId;
     url += '?access_token=' + token;
 
+    // Gets current file info, including parent
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
+                // Remove old parent and add new parent
                 var result = JSON.parse(xhr.responseText);
                 var currentParent = result.parents[0].id;
 
@@ -67,6 +69,18 @@ function relocateFileToFolder(token, fileId, folderId) {
                 urlUpdate += "&addParents=" + folderId;
 
                 var xhrUpdate = new XMLHttpRequest();
+                xhrUpdate.onreadystatechange = function() {
+                    if (xhrUpdate.readyState === XMLHttpRequest.DONE) {
+                        if (xhrUpdate.status === 200) {
+                            var finalResult = JSON.parse(xhrUpdate.responseText);
+                            var link = finalResult.alternateLink;
+                            console.log(link);
+                            uploadFinished(link);
+                        } else {
+                            console.log(xhrUpdate.responseText);
+                        }
+                    }        
+                };
                 xhrUpdate.open('PUT', urlUpdate, true);
                 xhrUpdate.send();
             } else {

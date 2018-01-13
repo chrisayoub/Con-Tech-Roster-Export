@@ -1,3 +1,6 @@
+// Limits multiple clicks of 'Export' button
+var running = false;
+
 // Generates the report and formats it
 function generateReport(tgtDate) {
     var dateStr = getDateStr(tgtDate);
@@ -10,6 +13,7 @@ function generateReport(tgtDate) {
                 // Check for present data
                 if (data.split('\n').length < 3) {
                     document.getElementById('error').innerHTML = 'No data to export for this date.';
+                    running = false;
                 } else {
                     let objToUpload = generateSpreadsheet(data, tgtDate);
                     uploadSheet(objToUpload, tgtDate);
@@ -17,6 +21,7 @@ function generateReport(tgtDate) {
             } else {
                 document.getElementById('error').innerHTML = 'Error: Could not get Shiftboard report.';
                 console.log(xhr.responseText);
+                running = false;
             }
         }        
     };
@@ -34,6 +39,7 @@ function uploadSheet(spreadsheet, tgtDate) {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     let result = JSON.parse(xhr.responseText);
+
                     // Auto-resize cols
                     resizeCols(result, token);
 
@@ -43,6 +49,7 @@ function uploadSheet(spreadsheet, tgtDate) {
                 } else {
                     document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
                     console.log(xhr.responseText);
+                    running = false;
                 }
             }        
         };
@@ -56,10 +63,15 @@ function uploadSheet(spreadsheet, tgtDate) {
 function uploadFinished(link) {
     document.getElementById('error').innerHTML = '';
     var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
-    document.getElementById('link').innerHTML = msg;
-    document.getElementById('link').addEventListener('click', () => {
+    var linkElem = document.getElementById('link');
+    // Reset event listeners
+    linkElem.outerHTML = linkElem.outerHTML;
+    // Update text
+    linkElem.innerHTML = msg;
+    linkElem.addEventListener('click', () => {
         chrome.tabs.create({ url: link });
     });
+    running = false;
 }
 
 // Resizes cols to be automatic resize after data uploaded
@@ -187,6 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initalize buttons
     document.getElementById('export').addEventListener('click', () => {
+        if (running) {
+            console.log('Export is already running!');
+            return;
+        }
+        running = true;
+
         // Reset link field
         document.getElementById('link').innerHTML = '';
         // Check for a valid date
@@ -196,9 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
             generateReport(date);
         } else {
             document.getElementById('error').innerHTML = 'Invalid date entered.';
+            running = false;
         }
     });
-    
+
     document.getElementById('shiftboard').addEventListener('click', () => {
         doShiftboardLogin();
     });
