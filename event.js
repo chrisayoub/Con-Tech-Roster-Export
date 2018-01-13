@@ -11,7 +11,7 @@ function getReportCsv(tgtDate) {
                     document.getElementById('error').innerHTML = 'No data to export for this date.';
                 } else {
                     let objToUpload = generateSpreadsheet(data, tgtDate);
-                    uploadSheet(objToUpload);
+                    uploadSheet(objToUpload, tgtDate);
                 }       
             } else {
                 document.getElementById('error').innerHTML = 'Error: Could not get Shiftboard report.';
@@ -23,7 +23,7 @@ function getReportCsv(tgtDate) {
     xhr.send();
 }
 
-function uploadSheet(spreadsheet) {
+function uploadSheet(spreadsheet, tgtDate) {
     getDriveToken(false, function(token) {
         var url = 'https://sheets.googleapis.com/v4/spreadsheets';
         url += '?access_token=' + token;
@@ -34,6 +34,11 @@ function uploadSheet(spreadsheet) {
                     let result = JSON.parse(xhr.responseText);
                     // Auto-resize cols
                     resizeCols(result, token);
+
+                    // Try to move into correct folder
+                    var id = result.spreadsheetId;
+                    moveFileIntoFolder(token, tgtDate, id);
+
                     // Done!
                     document.getElementById('error').innerHTML = '';
                     let link = result.spreadsheetUrl;
