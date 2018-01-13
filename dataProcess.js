@@ -75,8 +75,6 @@ function formatMatrix(matrix) {
     // Manual header overrides
     newMatrix[0][0] = 'Name';
     newMatrix[0].push('Arrive');
-    newMatrix[0].push('Depart');
-    newMatrix[0].push('No Show');
     newMatrix[0].push('Notes');
 
     // Temporarily remove the header
@@ -172,7 +170,10 @@ function identifyFirstBoundary(matrix) {
 function getSheetTemplate() {
     let sheet = {
         properties: {
-            title: ''
+            title: '',
+            gridProperties: {
+                frozenRowCount: 1
+            }
         },
         data: [
             {
@@ -193,8 +194,11 @@ function getSheetForName(matrix, name, startIndex) {
     sheet.properties.title = name;
     var rowData = sheet.data[0].rowData;
 
+    // Header
+    rowData.push(rowToBoldedSheetRow(matrix, 0));
+
     // CMs
-    for (var i = 0; i < startIndex; i++) {
+    for (var i = 1; i < startIndex; i++) {
         rowData.push(rowToSheetRow(matrix, i));
     }
 
@@ -212,10 +216,13 @@ function getSheetForName(matrix, name, startIndex) {
 
 function getMasterSheet(matrix) {
     var sheet = getSheetTemplate();
-    sheet.properties.title = 'Master';
+    sheet.properties.title = 'Combined';
     var rowData = sheet.data[0].rowData;
 
-    for (var i = 0; i < matrix.length; i++) {
+    // Header
+    rowData.push(rowToBoldedSheetRow(matrix, 0));
+
+    for (var i = 1; i < matrix.length; i++) {
         rowData.push(rowToSheetRow(matrix, i));
     }
 
@@ -234,6 +241,31 @@ function rowToSheetRow(matrix, rowIndex) {
         var toAdd = {
             userEnteredValue: {
                 stringValue: row[i]
+            }
+        };
+        vals.push(toAdd);
+    }
+
+    return result;
+}
+
+// Returns a BOLDED sheet row for the given index
+function rowToBoldedSheetRow(matrix, rowIndex) {
+    var result = {
+        values: []
+    };
+    var vals = result.values;
+
+    let row = matrix[rowIndex];
+    for (var i = 0; i < row.length; i++) {
+        var toAdd = {
+            userEnteredValue: {
+                stringValue: row[i]
+            },
+            userEnteredFormat: {
+                textFormat: {
+                    bold: true
+                }
             }
         };
         vals.push(toAdd);
