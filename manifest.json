@@ -1,12 +1,11 @@
 {
   "name": "ConTech Roster Generator",
   "description" : "Generates ConTech rosters based on specified date.",
-  "version": "1.0",
+  "version": "1.2",
   "manifest_version": 2,
 
   "browser_action": {
-    "default_popup": "popup.html",
-    "default_icon": "logo.png" 
+    "default_popup": "popup.html"
   },
   "permissions": [
     "cookies",
@@ -17,7 +16,7 @@
     "tabs"
   ],
   "oauth2": {
-    "client_id": "996467658815-0ju2ks90v18ta5ng088uscnbodeou5ju.apps.googleusercontent.com",
+    "client_id": "996467658815-6od5p6sav5r6cjg07f0ns06bf6dc3jq3.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive"
     ]
