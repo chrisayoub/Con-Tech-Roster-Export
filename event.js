@@ -1,4 +1,5 @@
-function getReportCsv(tgtDate) {
+// Generates the report and formats it
+function generateReport(tgtDate) {
     var dateStr = getDateStr(tgtDate);
     var url = getReportUrl(dateStr);
     var xhr = new XMLHttpRequest();
@@ -23,6 +24,7 @@ function getReportCsv(tgtDate) {
     xhr.send();
 }
 
+// Uploads the spreadsheet data to Drive
 function uploadSheet(spreadsheet, tgtDate) {
     getDriveToken(false, function(token) {
         var url = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -38,15 +40,6 @@ function uploadSheet(spreadsheet, tgtDate) {
                     // Try to move into correct folder
                     var id = result.spreadsheetId;
                     moveFileIntoFolder(token, tgtDate, id);
-
-                    // Done!
-                    document.getElementById('error').innerHTML = '';
-                    let link = result.spreadsheetUrl;
-                    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
-                    document.getElementById('link').innerHTML = msg;
-                    document.getElementById('link').addEventListener('click', () => {
-                        chrome.tabs.create({ url: link });
-                    });
                 } else {
                     document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
                     console.log(xhr.responseText);
@@ -59,6 +52,17 @@ function uploadSheet(spreadsheet, tgtDate) {
     });
 }
 
+// Formats UI for finished upload
+function uploadFinished(link) {
+    document.getElementById('error').innerHTML = '';
+    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
+    document.getElementById('link').innerHTML = msg;
+    document.getElementById('link').addEventListener('click', () => {
+        chrome.tabs.create({ url: link });
+    });
+}
+
+// Resizes cols to be automatic resize after data uploaded
 function resizeCols(spreadsheetInfo, token) {
     var url = 'https://sheets.googleapis.com/v4/spreadsheets/';
     url += spreadsheetInfo.spreadsheetId + ':batchUpdate';
@@ -99,6 +103,7 @@ function resizeCols(spreadsheetInfo, token) {
     xhr.send(JSON.stringify(payload));
 }
 
+// Report URL for data export from Shiftboard
 function getReportUrl(tgtDate) {
     return 'https://www.shiftboard.com/servola/reporting/report.cgi?' + 
             'type=coverage&ss=298255&deleted_teams=2&covered=1&' + 
@@ -107,14 +112,17 @@ function getReportUrl(tgtDate) {
             'end_date=' + tgtDate
 }
 
+// Opens a tab for Shiftboard login
 function doShiftboardLogin() {
     chrome.tabs.create({url: 'https://www.shiftboard.com/sxsw/'}, null);
 }
 
+// Gets a Drive auth token
 function getDriveToken(interactive, callbackFunc) {
     chrome.identity.getAuthToken({ 'interactive': interactive }, callbackFunc);
 }
 
+// Formats the date for Shiftboard export
 function getDateStr(date) {
     var year = date.getFullYear();
 
@@ -127,6 +135,7 @@ function getDateStr(date) {
     return year + month + day;
 }
 
+// Display current auth status for Drive in UI
 function showDriveAuthDetails(interactive) {
     getDriveToken(interactive, function(token) {
         if (token != null) {
@@ -141,6 +150,7 @@ function showDriveAuthDetails(interactive) {
     });
 }
 
+// Logouts current Drive account
 function revokeDriveAuth() {
     getDriveToken(false, function(token) {
         if (token != null) {
@@ -160,9 +170,8 @@ function revokeDriveAuth() {
     });
 }
 
-// Sets up the UI buttons
+// Configures the UI
 document.addEventListener('DOMContentLoaded', () => {
-
     // First, check for Shiftboard login
     // If already logged in, remove prompt to Login
     var details = {name: 'SB2Session', url: 'https://www.shiftboard.com'}
@@ -183,13 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check for a valid date
         var date = $('#datepicker').datepicker( "getDate" );
         if (date != null) {
-            // Get the report data
-            getReportCsv(date);
+            // Generate the report
+            generateReport(date);
         } else {
             document.getElementById('error').innerHTML = 'Invalid date entered.';
         }
     });
-
+    
     document.getElementById('shiftboard').addEventListener('click', () => {
         doShiftboardLogin();
     });
