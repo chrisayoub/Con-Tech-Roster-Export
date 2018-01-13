@@ -64,13 +64,11 @@ function uploadFinished(link) {
     document.getElementById('error').innerHTML = '';
     var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
     var linkElem = document.getElementById('link');
-    // Reset event listeners
-    linkElem.outerHTML = linkElem.outerHTML;
     // Update text
     linkElem.innerHTML = msg;
-    linkElem.addEventListener('click', () => {
+    linkElem.onclick = function() {
         chrome.tabs.create({ url: link });
-    });
+    };
     running = false;
 }
 
