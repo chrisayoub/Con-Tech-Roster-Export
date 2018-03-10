@@ -107,7 +107,6 @@ function generateArrayFromDict(dict) {
         var name = names[i]; 
         result.push([name, dict[name]]);
     } 
-    result.push(["", ""]);
     return result;
 }
 
@@ -150,13 +149,13 @@ function getVolScoreSheetTitle(tgtDate) {
     var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let day = days[ tgtDate.getDay() ];
     let trueMonth = tgtDate.getMonth() + 1;
-    let title = '' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
+    let title = 'Vol Scoring Links - ' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
     return title;
 }
 
 function getMasterLinkSheet(matrix, tgtDate) {
     var sheet = getSheetTemplate();
-    sheet.properties.title = getVolScoreSheetTitle(tgtDate);
+    sheet.properties.title = null;
     var rowData = sheet.data[0].rowData;
 
     // Header
