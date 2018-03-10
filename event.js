@@ -29,6 +29,37 @@ function generateReport(tgtDate) {
     xhr.send();
 }
 
+// Uploads the Links spreadsheet data to Drive
+function uploadLinkSheet(spreadsheet, tgtDate) {
+    getDriveToken(false, function(token) {
+        var url = 'https://sheets.googleapis.com/v4/spreadsheets';
+        url += '?access_token=' + token;
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    let result = JSON.parse(xhr.responseText);
+
+                    // Auto-resize cols
+                    resizeCols(result, token);
+
+                    // Try to move into correct folder
+                    var id = result.spreadsheetId;
+                    moveLinkFileIntoFolder(token, tgtDate, id);
+                    
+                } else {
+                    document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
+                    console.log(xhr.responseText);
+                    running = false;
+                }
+            }        
+        };
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify(spreadsheet));
+    });
+}
+
 // Uploads the spreadsheet data to Drive
 function uploadSheet(spreadsheet, tgtDate) {
     getDriveToken(false, function(token) {
@@ -71,6 +102,20 @@ function uploadFinished(link) {
     };
     running = false;
 }
+
+// Formats UI for Vol Score finished upload
+function uploadFinishedVolScore(link) {
+    document.getElementById('error').innerHTML = '';
+    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
+    var linkElem = document.getElementById('volScoreLink');
+    // Update text
+    linkElem.innerHTML = msg;
+    linkElem.onclick = function() {
+        chrome.tabs.create({ url: link });
+    };
+    running = false;
+}
+
 
 // Resizes cols to be automatic resize after data uploaded
 function resizeCols(spreadsheetInfo, token) {
