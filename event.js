@@ -230,4 +230,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initalize date picker
     $('#datepicker').datepicker();
+
+    // Initailize Vol-Score link button
+    document.getElementById('genLinks').addEventListener('click', () => {
+        if (running) {
+            console.log('Export is already running!');
+            return;
+        }
+        running = true;
+
+        // Reset link field
+        document.getElementById('link').innerHTML = '';
+        // Check for a valid date
+        var date = $('#datepicker').datepicker( "getDate" );
+        if (date != null) {
+            // Generate the links!
+            generateLinksForDate(date);
+        } else {
+            document.getElementById('error').innerHTML = 'Invalid date entered.';
+            running = false;
+        }
+    });
 });

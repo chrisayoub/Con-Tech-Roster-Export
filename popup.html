@@ -1,6 +1,7 @@
 <html>
   <head>
     <!-- Main code -->
+    <script src="linkGen.js"></script>
     <script src="drive.js"></script>
     <script src="dataProcess.js"></script>
     <script src="event.js"></script>
@@ -32,10 +33,15 @@
     <div id="datePick">
       <p>Now, select your date of roster export.</p>
       <input type="text" id="datepicker" style="width: 100px">
-      <button id="export">Export</button> 
+      <button id="export">Export Rosters</button> 
     </div>   
 
     <p id="error" style="color: red; font-weight: bold;"></p>
     <p id="link" style="font-weight: bold;"></p>
+
+    <h1><b>------------------</b></h1>
+
+    <p>Click this button after selecting a date to generate customized vol-scoring links for SL / Ninjas:</p>
+    <button id="genLinks">Generate Vol Score Links</button> 
   </body>
 </html>
