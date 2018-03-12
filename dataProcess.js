@@ -137,22 +137,25 @@ function getBlankRow(length) {
 
 // Returns a Set of unique locations to create Sheets for
 function getUniqueLocations(matrix) {
-    var locs = new Set();
+    var locs = [];
 
     var i = 1;
-    var role = matrix[i][1];
-    while (role !== 'Shift Leader') {
-        role = matrix[++i][1];
+    // Skip pasts CMs
+    while (matrix[i][2] !== '') {
+        i++;
     }
 
-    // Now on the Shift Leaders
-    while (role !== '') {
+    // Consider SL, Ninja, vol locations
+    for (; i < matrix.length; i++) {
         let fullLoc = matrix[i][2];
         let loc = fullLoc.split(' - ')[0];
-        locs.add(loc);
-        role = matrix[++i][1];
+        
+        if (loc !== '' && !locs.includes(loc)) {
+            locs.push(loc);
+        }
     }
 
+    locs.sort();
     return locs;
 }
 
