@@ -7,25 +7,6 @@ function getReportUrl(tgtDate) {
         'end_date=' + tgtDate
 }
 
-// Generates the report and formats it
-function generateReport(tgtDate) {
-    retrieveShiftboardData(new function(data) {
-        let objToUpload = generateRosterSpreadsheet(data, tgtDate);
-        uploadSheet(objToUpload, tgtDate);
-    });
-}
-
-// Starts the process on generating the links for a specific date
-function generateLinks(tgtDate) {
-    retrieveShiftboardData(new function(data) {
-        let objToUpload = generateLinkSpreadsheet(data, tgtDate);
-        // Now, upload the object
-        uploadLinkSheet(uploadObject, tgtDate);
-        // Done!
-        running = false;
-    });
-}
-
 // Common function to get Shiftboard data, do a callback when got
 function retrieveShiftboardData(callback) {
     var dateStr = getDateStr(tgtDate);
@@ -53,38 +34,8 @@ function retrieveShiftboardData(callback) {
     xhr.send();
 }
 
-// Uploads the Links spreadsheet data to Drive
-function uploadLinkSheet(spreadsheet, tgtDate) {
-    getDriveToken(false, function(token) {
-        var url = 'https://sheets.googleapis.com/v4/spreadsheets';
-        url += '?access_token=' + token;
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    let result = JSON.parse(xhr.responseText);
-
-                    // Auto-resize cols
-                    resizeCols(result, token);
-
-                    // Try to move into correct folder
-                    var id = result.spreadsheetId;
-                    moveLinkFileIntoFolder(token, tgtDate, id);
-
-                } else {
-                    msg('Error: Could not upload Google Sheet.');
-                    console.log(xhr.responseText);
-                    stopRunning();
-                }
-            }
-        };
-        xhr.open('POST', url, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify(spreadsheet));
-    });
-}
-
-// Uploads the spreadsheet data to Drive
+// Common function to upload sheet to Drive
+// Executes the callback function stored in the global variable 'relocateFunction'
 function uploadSheet(spreadsheet, tgtDate) {
     getDriveToken(false, function(token) {
         var url = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -100,38 +51,7 @@ function uploadSheet(spreadsheet, tgtDate) {
 
                     // Try to move into correct folder
                     var id = result.spreadsheetId;
-                    moveFileIntoFolder(token, tgtDate, id);
-                } else {
-                    msg('Error: Could not upload Google Sheet.');
-                    console.log(xhr.responseText);
-                    stopRunning();
-                }
-            }
-        };
-        xhr.open('POST', url, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify(spreadsheet));
-    });
-}
-
-// Common function to upload sheet to Drive
-// Callback function useful for moving into folder
-function uploadSheet(spreadsheet, tgtDate, callback) {
-    getDriveToken(false, function(token) {
-        var url = 'https://sheets.googleapis.com/v4/spreadsheets';
-        url += '?access_token=' + token;
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    let result = JSON.parse(xhr.responseText);
-
-                    // Auto-resize cols
-                    resizeCols(result, token);
-
-                    // Try to move into correct folder
-                    var id = result.spreadsheetId;
-                    moveFileIntoFolder(token, tgtDate, id);
+                    relocateFunction(token, tgtDate, id);
                 } else {
                     msg('Error: Could not upload Google Sheet.');
                     console.log(xhr.responseText);
@@ -184,4 +104,87 @@ function resizeCols(spreadsheetInfo, token) {
     xhr.open('POST', url, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(payload));
+}
+
+// Moves the file into the given folder.
+// Removes current parent reference and adds a new parent
+// Executes the callback function stored in the global variable 'finishFunction'
+function relocateFileToFolder(token, fileId, folderId) {
+    // Do nothing if null params
+    if (token === null || fileId === null || folderId === null) {
+        return;
+    }
+
+    var url = 'https://www.googleapis.com/drive/v2/files/';
+    url += fileId;
+    url += '?access_token=' + token;
+
+    // Gets current file info, including parent
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                // Remove old parent and add new parent
+                var result = JSON.parse(xhr.responseText);
+                var currentParent = result.parents[0].id;
+
+                var urlUpdate = url;
+                urlUpdate += "&removeParents=" + currentParent;
+                urlUpdate += "&addParents=" + folderId;
+
+                var xhrUpdate = new XMLHttpRequest();
+                xhrUpdate.onreadystatechange = function() {
+                    if (xhrUpdate.readyState === XMLHttpRequest.DONE) {
+                        if (xhrUpdate.status === 200) {
+                            var finalResult = JSON.parse(xhrUpdate.responseText);
+                            var link = finalResult.alternateLink;
+                            console.log(link);
+                            // Finish function, report result
+                            finishUploadFunction(link);
+                        } else {
+                            console.log(xhrUpdate.responseText);
+                        }
+                    }
+                };
+                xhrUpdate.open('PUT', urlUpdate, true);
+                xhrUpdate.send();
+            } else {
+                console.log(xhr.responseText);
+            }
+        }
+    };
+    xhr.open('GET', url, true);
+    xhr.send();
+}
+
+// Callsback the ID of the child folder, null
+// if not present.
+function findChildFolder(token, parent, childName, callback) {
+    var url = 'https://www.googleapis.com/drive/v2/files';
+    url += '?access_token=' + token + '&';
+    url += "q=title%3D'" + childName + "'";
+    if (parent !== null) {
+        url += "+and+'" + parent + "'+in+parents";
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                let result = JSON.parse(xhr.responseText);
+                if (result.items.length === 0) {
+                    console.log(xhr.responseText);
+                    callback(null);
+                } else {
+                    let id = result.items[0].id;
+                    callback(id);
+                }
+            } else {
+                console.log(xhr.responseText);
+                callback(null);
+            }
+        }
+    };
+    xhr.open('GET', url, true);
+    xhr.send();
 }

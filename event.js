@@ -1,37 +1,55 @@
 // Functions related to UI and account authorization
 
-// Formats UI for finished upload
-function uploadFinished(link) {
-    msg();
-    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
+// Global variables used for specifying which function to execute in the process
+let spreadsheetFunction = null;
+let relocateFunction = null;
+let finishUploadFunction = null;
+
+// Generates the report and formats it
+function generateReport(tgtDate) {
+    spreadsheetFunction = generateRosterSpreadsheet;
+    relocateFunction = moveRosterIntoFolder;
+    finishUploadFunction = finishRosterUpload;
+    doProcess(tgtDate);
+}
+
+// Starts the process on generating the links for a specific date
+function generateLinks(tgtDate) {
+    spreadsheetFunction = generateLinkSpreadsheet;
+    relocateFunction = moveLinksIntoFolder;
+    finishUploadFunction = finishLinksUpload;
+    doProcess(tgtDate);
+}
+
+// General function call order:
+// retrieveShiftboardData (webRequest.js)
+// uploadSheet (webRequest.js)
+// moveRosterIntoFolder OR moveLinksIntoFolder (driveFolderRelocation.js)
+// finishRosterUpload OR finishLinksUpload (event.js)
+function doProcess(tgtDate) {
+    retrieveShiftboardData(data => {
+        let objToUpload = spreadsheetFunction(data, tgtDate);
+        uploadSheet(objToUpload, tgtDate, relocateFunction, finishUploadFunction);
+    });
+}
+
+// Finish function for Rosters
+function finishRosterUpload(link) {
     var linkElem = document.getElementById('link');
-    // Update text
-    linkElem.innerHTML = msg;
-    linkElem.onclick = function() {
-        chrome.tabs.create({ url: link });
-    };
-    stopRunning();
+    finishUpload(link, linkElem);
 }
 
-// Formats UI for Vol Score finished upload
-function uploadFinishedVolScore(link) {
-    msg();
-    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
+// Finish function for Vol Score Links
+function finishLinksUpload(link) {
     var linkElem = document.getElementById('volScoreLink');
-    // Update text
-    linkElem.innerHTML = msg;
-    linkElem.onclick = function() {
-        chrome.tabs.create({ url: link });
-    };
-    stopRunning();
+    finishUpload(link, linkElem);
 }
 
+// Formats UI for finished upload
 function finishUpload(link, linkElem) {
     msg();
-    var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
-    var linkElem = document.getElementById('volScoreLink');
     // Update text
-    linkElem.innerHTML = msg;
+    linkElem.innerHTML = 'Success! Link: <a href="' + link + '">Click here!</a>';
     linkElem.onclick = function() {
         chrome.tabs.create({ url: link });
     };
