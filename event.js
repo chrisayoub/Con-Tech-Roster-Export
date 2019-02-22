@@ -27,7 +27,7 @@ function generateLinks(tgtDate) {
 // moveRosterIntoFolder OR moveLinksIntoFolder (driveFolderRelocation.js)
 // finishRosterUpload OR finishLinksUpload (event.js)
 function doProcess(tgtDate) {
-    retrieveShiftboardData(data => {
+    retrieveShiftboardData(tgtDate, data => {
         let objToUpload = spreadsheetFunction(data, tgtDate);
         uploadSheet(objToUpload, tgtDate, relocateFunction, finishUploadFunction);
     });
@@ -155,25 +155,23 @@ function revokeDriveAuth() {
 // Shared action for clicking 'Roster' or 'Links' button
 // Simply uses a different callback for each
 function exportClickAction(callback) {
-    return new function () {
-        if (isRunning()) {
-            console.log('Export is already running!');
-            return;
-        }
-        startRunning();
+    if (isRunning()) {
+        console.log('Export is already running!');
+        return;
+    }
+    startRunning();
 
-        // Reset link field
-        document.getElementById('link').innerHTML = '';
-        // Check for a valid date
-        var date = getDate();
-        if (date != null) {
-            // Generate the report
-            callback(date);
-        } else {
-            msg('Invalid date entered.');
-            stopRunning();
-        }
-    };
+    // Reset link field
+    document.getElementById('link').innerHTML = '';
+    // Check for a valid date
+    var date = getDate();
+    if (date != null) {
+        // Generate the report
+        callback(date);
+    } else {
+        msg('Invalid date entered.');
+        stopRunning();
+    }
 }
 
 // Configures the UI
@@ -183,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     var details = {name: 'SB2Session', url: 'https://www.shiftboard.com'};
     chrome.cookies.get(details, function(cookie) {
         if (cookie != null) {
-            document.getElementById('shiftboardLogin').outerHTML='';
+            document.getElementById('shiftboardLogin').outerHTML = '';
         }
     });
 
@@ -192,7 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
     showDriveAuthDetails(false);
 
     // Initalize buttons
-    document.getElementById('export').addEventListener('click', exportClickAction(generateReport));
+    document.getElementById('export').addEventListener('click', () => {
+        exportClickAction(generateReport)
+    });
+
+    document.getElementById('genLinks').addEventListener('click', () => {
+        exportClickAction(generateLinks)
+    });
 
     document.getElementById('shiftboard').addEventListener('click', () => {
         doShiftboardLogin();
@@ -205,6 +209,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('revokeAuth').addEventListener('click', () => {
         revokeDriveAuth();
     });
-
-    document.getElementById('genLinks').addEventListener('click', exportClickAction(generateLinks));
 });

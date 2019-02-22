@@ -8,7 +8,7 @@ function getReportUrl(tgtDate) {
 }
 
 // Common function to get Shiftboard data, do a callback when got
-function retrieveShiftboardData(callback) {
+function retrieveShiftboardData(tgtDate, callback) {
     var dateStr = getDateStr(tgtDate);
     var url = getReportUrl(dateStr);
     var xhr = new XMLHttpRequest();
