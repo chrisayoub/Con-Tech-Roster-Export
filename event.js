@@ -110,7 +110,7 @@ function hideDoAuthBtn() {
 
 // Display a message, or an error
 function msg(m) {
-    if (msg === null) {
+    if (!m) {
         // Null param will clear msg
         document.getElementById('error').innerHTML = '';
     } else {

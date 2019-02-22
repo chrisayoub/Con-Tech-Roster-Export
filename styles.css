@@ -19,6 +19,10 @@ button {
     width: 150px;
 }
 
+#shiftboardLogin p {
+    font-weight: bold;
+}
+
 #error {
     color: red;
     font-weight: bold;

@@ -16,18 +16,20 @@ function replaceYear(path, tgtDate) {
 
 // Relocation of roster sheet
 function moveRosterIntoFolder(token, tgtDate, fileId) {
-    let ROSTER_PATH =  BASE_PATH + 'Rosters'.split(',');
+    let ROSTER_PATH = BASE_PATH + 'Rosters';
     moveFileIntoFolder(token, tgtDate, fileId, ROSTER_PATH);
 }
 
 // Relocation of link sheet
 function moveLinksIntoFolder(token, tgtDate, fileId) {
-    let LINK_PATH = BASE_PATH + 'Vol Scoring Links'.split(',');
+    let LINK_PATH = BASE_PATH + 'Vol Scoring Links';
     moveFileIntoFolder(token, tgtDate, fileId, LINK_PATH);
 }
 
 // Common function for moving file into folder based on path
 function moveFileIntoFolder(token, tgtDate, fileId, path) {
+    // Split path into array
+    path = path.split(',');
     // Resolve placeholder value for year
     replaceYear(path, tgtDate);
     // Kick off recursion to relocate!
