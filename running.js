@@ -8,8 +8,11 @@ function isRunning() {
 
 function stopRunning() {
     running = false;
+    document.getElementById('loader').style.display = 'none';
 }
 
 function startRunning() {
     running = true;
+    msg();
+    document.getElementById('loader').style.display = 'block';
 }
