@@ -159,9 +159,10 @@ function getSheetForName(matrix, name, startIndex) {
 
     // Now, based on venue
     for (var i = startIndex; i < matrix.length; i++) {
+        let isBlankRow = matrix[i][0].length === 0;
         let fullLoc = matrix[i][2];
         let loc = fullLoc.split(' - ')[0];
-        if (loc === name || loc === '') {
+        if (loc === name || isBlankRow) {
             rowData.push(rowToSheetRow(matrix, i));
         }
     }
@@ -244,11 +245,11 @@ function createUploadObject(matrix, tgtDate) {
 
     var result = getSpreadsheet(getTitle(tgtDate));
 
+    result.sheets.push(getMasterSheet(matrix));
     for (let loc of locs) {
         let sheet = getSheetForName(matrix, loc, boundary);
         result.sheets.push(sheet);
     }
-    result.sheets.push(getMasterSheet(matrix));
 
     return result;
 }
