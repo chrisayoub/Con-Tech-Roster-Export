@@ -93,7 +93,7 @@ function getDate() {
 
 // Show, hide various buttons
 function showRevokeAuthBtn() {
-    document.getElementById('revokeAuth').style.display = null;
+    document.getElementById('revokeAuth').style.display = 'block';
 }
 
 function hideRevokeAuthBtn() {
@@ -101,7 +101,7 @@ function hideRevokeAuthBtn() {
 }
 
 function showDoAuthBtn() {
-    document.getElementById('driveAuthBtn').style.display = null;
+    document.getElementById('driveAuthBtn').style.display = 'block';
 }
 
 function hideDoAuthBtn() {
