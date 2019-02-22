@@ -1,7 +1,7 @@
 {
   "name": "ConTech Roster Generator",
-  "description" : "Generates ConTech rosters based on specified date.",
-  "version": "1.5.1",
+  "description" : "Generates ConTech rosters and vol-scoring links based on specified date.",
+  "version": "2.0.0",
   "manifest_version": 2,
 
   "browser_action": {
