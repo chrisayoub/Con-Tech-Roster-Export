@@ -12,14 +12,14 @@ function generateReport(tgtDate) {
                 let data = xhr.responseText;
                 // Check for present data
                 if (data.split('\n').length < 3) {
-                    document.getElementById('error').innerHTML = 'No data to export for this date.';
+                    msg('No data to export for this date.');
                     running = false;
                 } else {
                     let objToUpload = generateSpreadsheet(data, tgtDate);
                     uploadSheet(objToUpload, tgtDate);
                 }       
             } else {
-                document.getElementById('error').innerHTML = 'Error: Could not get Shiftboard report.';
+                msg('Error: Could not get Shiftboard report.');
                 console.log(xhr.responseText);
                 running = false;
             }
@@ -48,7 +48,7 @@ function uploadLinkSheet(spreadsheet, tgtDate) {
                     moveLinkFileIntoFolder(token, tgtDate, id);
                     
                 } else {
-                    document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
+                    msg('Error: Could not upload Google Sheet.');
                     console.log(xhr.responseText);
                     running = false;
                 }
@@ -78,7 +78,7 @@ function uploadSheet(spreadsheet, tgtDate) {
                     var id = result.spreadsheetId;
                     moveFileIntoFolder(token, tgtDate, id);
                 } else {
-                    document.getElementById('error').innerHTML = 'Error: Could not upload Google Sheet.';
+                    msg('Error: Could not upload Google Sheet.');
                     console.log(xhr.responseText);
                     running = false;
                 }
@@ -92,7 +92,7 @@ function uploadSheet(spreadsheet, tgtDate) {
 
 // Formats UI for finished upload
 function uploadFinished(link) {
-    document.getElementById('error').innerHTML = '';
+    msg();
     var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
     var linkElem = document.getElementById('link');
     // Update text
@@ -105,7 +105,7 @@ function uploadFinished(link) {
 
 // Formats UI for Vol Score finished upload
 function uploadFinishedVolScore(link) {
-    document.getElementById('error').innerHTML = '';
+    msg();
     var msg = 'Success! Link: <a href="' + link + '">Click here!</a>';
     var linkElem = document.getElementById('volScoreLink');
     // Update text
@@ -115,7 +115,6 @@ function uploadFinishedVolScore(link) {
     };
     running = false;
 }
-
 
 // Resizes cols to be automatic resize after data uploaded
 function resizeCols(spreadsheetInfo, token) {
@@ -148,7 +147,7 @@ function resizeCols(spreadsheetInfo, token) {
     xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status !== 200) {
-                    document.getElementById('error').innerHTML = 'Error: Could not format Google Sheet.';
+                    msg('Error: Could not format Google Sheet.');
                     console.log(xhr.responseText);
                 }
             }        
@@ -202,17 +201,40 @@ function getDate() {
     return null;
 }
 
+function showRevokeAuthBtn() {
+    document.getElementById('revokeAuth').style.display = null;
+}
+
+function hideRevokeAuthBtn() {
+    document.getElementById('revokeAuth').style.display = 'none';
+}
+
+function showDoAuthBtn() {
+    document.getElementById('driveAuthBtn').style.display = null;
+}
+
+function hideDoAuthBtn() {
+    document.getElementById('driveAuthBtn').style.display = 'none';
+}
+
+function msg(m) {
+    if (msg === null) {
+        document.getElementById('error').innerHTML = '';
+    } else {
+        document.getElementById('error').innerHTML = m;
+    }
+}
+
 // Display current auth status for Drive in UI
 function showDriveAuthDetails(interactive) {
     getDriveToken(interactive, function(token) {
         if (token != null) {
-            var nameToSet = document.getElementById('accountName');
-            chrome.identity.getProfileUserInfo(function (userInfo) {
+            chrome.identity.getProfileUserInfo(function () {
                 // Switch the buttons
-                document.getElementById('revokeAuth').style.display = null;
-                document.getElementById('driveAuthBtn').style.display = 'none';
+                showRevokeAuthBtn();
+                hideDoAuthBtn();
             });
-            document.getElementById('error').innerHTML = '';
+            msg();
         }
     });
 }
@@ -226,34 +248,21 @@ function revokeDriveAuth() {
             xhr.open('GET', 'https://accounts.google.com/o/oauth2/revoke?token=' + token);
             xhr.send();
             // Hide the UI
-            document.getElementById('revokeAuth').style.display = 'none';
-            document.getElementById('driveAuthBtn').style.display = null;
+            hideRevokeAuthBtn();
+            showDoAuthBtn();
             // Success!
-            document.getElementById('error').innerHTML = 'Successfully logged out of Drive.'
+            msg('Successfully logged out of Drive.');
         } else {
             // Trying to revoke a null token!! Error
-            document.getElementById('error').innerHTML = 'Error: Cannot revoke null token.';
+            msg('Error: Cannot revoke null token.');
         }
     });
 }
 
-// Configures the UI
-document.addEventListener('DOMContentLoaded', () => {
-    // First, check for Shiftboard login
-    // If already logged in, remove prompt to Login
-    var details = {name: 'SB2Session', url: 'https://www.shiftboard.com'}
-    chrome.cookies.get(details, function(cookie) {
-        if (cookie != null) {
-            document.getElementById('shiftboardLogin').outerHTML='';
-        }
-    });
-
-    // Check if authorized with Drive
-    // Will not show authorization if authorized
-    showDriveAuthDetails(false);
-
-    // Initalize buttons
-    document.getElementById('export').addEventListener('click', () => {
+// Shared action for clicking 'Roster' or 'Links' button
+// Simply uses a different callback for each
+function exportClickAction(callback) {
+    return new function () {
         if (running) {
             console.log('Export is already running!');
             return;
@@ -266,12 +275,31 @@ document.addEventListener('DOMContentLoaded', () => {
         var date = getDate();
         if (date != null) {
             // Generate the report
-            generateReport(date);
+            callback(date);
         } else {
-            document.getElementById('error').innerHTML = 'Invalid date entered.';
+            msg('Invalid date entered.');
             running = false;
         }
+    };
+}
+
+// Configures the UI
+document.addEventListener('DOMContentLoaded', () => {
+    // First, check for Shiftboard login
+    // If already logged in, remove prompt to Login
+    var details = {name: 'SB2Session', url: 'https://www.shiftboard.com'};
+    chrome.cookies.get(details, function(cookie) {
+        if (cookie != null) {
+            document.getElementById('shiftboardLogin').outerHTML='';
+        }
     });
+
+    // Check if authorized with Drive
+    // Will not show authorization if authorized
+    showDriveAuthDetails(false);
+
+    // Initalize buttons
+    document.getElementById('export').addEventListener('click', exportClickAction(generateReport));
 
     document.getElementById('shiftboard').addEventListener('click', () => {
         doShiftboardLogin();
@@ -285,24 +313,5 @@ document.addEventListener('DOMContentLoaded', () => {
         revokeDriveAuth();
     });
 
-    // Initailize Vol-Score link button
-    document.getElementById('genLinks').addEventListener('click', () => {
-        if (running) {
-            console.log('Export is already running!');
-            return;
-        }
-        running = true;
-
-        // Reset link field
-        document.getElementById('link').innerHTML = '';
-        // Check for a valid date
-        var date = getDate();
-        if (date != null) {
-            // Generate the links!
-            generateLinksForDate(date);
-        } else {
-            document.getElementById('error').innerHTML = 'Invalid date entered.';
-            running = false;
-        }
-    });
+    document.getElementById('genLinks').addEventListener('click', exportClickAction(generateLinksForDate));
 });
