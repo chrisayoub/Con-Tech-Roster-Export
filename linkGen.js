@@ -1,3 +1,10 @@
+// Generates spreadsheet object for Sheets from raw data
+function generateLinkSpreadsheet(reportData, tgtDate) {
+    var matrix = dataToMatrix(reportData);
+    var dict = getLinksFromMatrix(matrix, tgtDate);
+    var sheetData = generateArrayFromDict(dict);
+    return createLinkSheetUploadObject(sheetData, tgtDate);
+}
 
 // Returns the location name for the form
 function mapLoc(location) {
@@ -110,50 +117,16 @@ function generateArrayFromDict(dict) {
     return result;
 }
 
-// Starts the process on generating the links for a specific date
-function generateLinksForDate(tgtDate) {
-    var dateStr = getDateStr(tgtDate);
-    var url = getReportUrl(dateStr);
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                let data = xhr.responseText;
-                // Check for present data
-                if (data.split('\n').length < 3) {
-                    document.getElementById('error').innerHTML = 'No data to export for this date.';
-                    running = false;
-                } else {
-                    var matrix = dataToMatrix(data);
-                    var dict = getLinksFromMatrix(matrix, tgtDate);
-                    var sheetData = generateArrayFromDict(dict);
-                    var uploadObject = createLinkSheetUploadObject(sheetData, tgtDate);
-                    // Now, upload the object
-                    uploadLinkSheet(uploadObject, tgtDate);
-                    // Done!
-                    running = false;
-                }       
-            } else {
-                document.getElementById('error').innerHTML = 'Error: Could not get Shiftboard report.';
-                console.log(xhr.responseText);
-                running = false;
-            }
-        }        
-    };
-    xhr.open('GET', url, true);
-    xhr.send();
-}
-
 // Get title for spreadsheet based on date
-function getVolScoreSheetTitle(tgtDate) {
+function getLinkSheetTitle(tgtDate) {
     var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let day = days[ tgtDate.getDay() ];
     let trueMonth = tgtDate.getMonth() + 1;
-    let title = 'Vol Scoring Links - ' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
-    return title;
+    return 'Vol Scoring Links - ' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
 }
 
-function getMasterLinkSheet(matrix, tgtDate) {
+// Transforms matrix data into Sheet object
+function getLinkSheet(matrix) {
     var sheet = getSheetTemplate();
     sheet.properties.title = null;
     var rowData = sheet.data[0].rowData;
@@ -170,14 +143,7 @@ function getMasterLinkSheet(matrix, tgtDate) {
 
 // Creates object in correct format for Google Sheets
 function createLinkSheetUploadObject(sheetData, tgtDate) {
-    var result = { 
-        properties: {
-            title: getVolScoreSheetTitle(tgtDate)
-        },
-        sheets: [] 
-    };
-
-    result.sheets.push(getMasterLinkSheet(sheetData, tgtDate));
-
+    var result = getSpreadsheet(getLinkSheetTitle(tgtDate));
+    result.sheets.push(getLinkSheet(sheetData));
     return result;
 }

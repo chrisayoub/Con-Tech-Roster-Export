@@ -1,37 +1,8 @@
 // Generates spreadsheet object for Sheets from raw data
-function generateSpreadsheet(reportData, tgtDate) {
+function generateRosterSpreadsheet(reportData, tgtDate) {
     var matrix = dataToMatrix(reportData);
     var newMatrix = formatMatrix(matrix);
     return createUploadObject(newMatrix, tgtDate);
-}
-
-// Parses the data into a 2D array, ignoring extra data.
-function dataToMatrix(reportData) {
-    var matrix = []
-    var rows = reportData.split('\n');
-
-    let NUM_COLS = 6;
-
-    // For the header
-    var header = rows[0].split('\t');
-    header.splice(NUM_COLS);
-    matrix.push(header);
-
-    // Exclude last blank row
-    for (var i = 1; i < rows.length - 1; i++) {
-        let row = rows[i];
-        let rowSplit = row.split('\t');
-        var newRow = []
-        matrix.push(newRow)
-        // Stops early, ignores unneeded cols
-        for (var j = 0; j < rowSplit.length && j < NUM_COLS; j++) {
-            // Removes the " characters
-            let col = rowSplit[j];
-            var newCol = col.substring(1, col.length - 1);
-            newRow.push(newCol)
-        }
-    }
-    return matrix;
 }
 
 /* Returns a new matrix with the correct formatting.
@@ -42,14 +13,14 @@ Format:
 * Inject blank rows in-between major groups (CM, Ninja, Shift Leader, Volunteer)
 * Give Ninja the correct Role (not Shift Leader) */
 function formatMatrix(matrix) {
-    var newMatrix = []
+    var newMatrix = [];
 
     let MAX_COL = 5;
 
     // Create initial blank matrix
     for (var i = 0; i < matrix.length; i++) {
-        var newRow = []
-        newMatrix.push(newRow)
+        var newRow = [];
+        newMatrix.push(newRow);
         // 9 total columns
         for (var j = 0; j < MAX_COL; j++) {
             newRow.push('');
@@ -170,25 +141,6 @@ function identifyFirstBoundary(matrix) {
     return i;
 }
 
-function getSheetTemplate() {
-    let sheet = {
-        properties: {
-            title: '',
-            gridProperties: {
-                frozenRowCount: 1
-            }
-        },
-        data: [
-            {
-                startRow: 0,
-                startColumn: 0,
-                rowData: []
-            }
-        ]
-    };
-    return sheet;
-}
-
 // Returns a Google Sheet for the specified
 // venue, including all CMs regardless
 // CMs are before the startIndex
@@ -282,8 +234,7 @@ function getTitle(tgtDate) {
     var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let day = days[ tgtDate.getDay() ];
     let trueMonth = tgtDate.getMonth() + 1;
-    let title = 'Rosters - ' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
-    return title;
+    return 'Rosters - ' + day + ' ' + trueMonth + '/' + tgtDate.getDate();
 }
 
 // Creates object in correct format for Google Sheets
@@ -291,12 +242,7 @@ function createUploadObject(matrix, tgtDate) {
     let locs = getUniqueLocations(matrix);
     let boundary = identifyFirstBoundary(matrix);
 
-    var result = { 
-        properties: {
-            title: getTitle(tgtDate)
-        },
-        sheets: [] 
-    };
+    var result = getSpreadsheet(getTitle(tgtDate));
 
     for (let loc of locs) {
         let sheet = getSheetForName(matrix, loc, boundary);

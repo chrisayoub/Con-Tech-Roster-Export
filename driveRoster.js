@@ -1,7 +1,66 @@
 // Moves the file into best possible destination folder
-function moveFileIntoFolder(token, tgtDate, fileId) {
-    findSXSWMaster(token, tgtDate, fileId);
+
+let YR_PLACE = '<yr>';
+let BASE_PATH = 'SXSW MASTER,' + YR_PLACE + ',';
+
+// Replace placeholder for actual year value
+function replaceYear(path, tgtDate) {
+    var year = tgtDate.getFullYear() + '';
+    for (var i = 0; i < path.length; i++) {
+        if (path[i] === YR_PLACE) {
+            path[i] = year;
+        }
+    }
+    return path;
 }
+
+// Relocation of roster sheet
+function moveRosterIntoFolder(token, tgtDate, fileId) {
+    let ROSTER_PATH =  BASE_PATH + 'Rosters'.split(',');
+    moveFileIntoFolder(token, tgtDate, fileId, ROSTER_PATH);
+}
+
+// Relocation of link sheet
+function moveLinksIntoFolder(token, tgtDate, fileId) {
+    let LINK_PATH = BASE_PATH + 'Vol Scoring Links'.split(',');
+    moveFileIntoFolder(token, tgtDate, fileId, LINK_PATH);
+}
+
+// Common function for moving file into folder based on path
+function moveFileIntoFolder(token, tgtDate, fileId, path) {
+    replaceYear(path, tgtDate); // Resolve placeholder value
+
+
+
+
+}
+
+function recursivePathRelocation(token, fileId, path, index) {
+    let prevTgtName;
+    let currTgtName = path[index];
+    if (index > 0) {
+        prevTgtName = path[index - 1];
+    }
+
+    findChildFolder(token, prevTgtName, currTgtName, function(result) {
+        // if (year !== null) {
+        //     findRostersFolder(token, year, fileId);
+        // } else {
+        //     relocateFileToFolder(token, fileId, parent);
+        // }
+
+        if (result !== null) {
+            // Found the resulting folder! Try and find the next one
+            recursivePathRelocation(token, fileId, path, index + 1);
+        } else {
+            // Didn't work, relocate into parent
+        }
+    });
+}
+
+// function moveFileIntoFolder(token, tgtDate, fileId) {
+//     findSXSWMaster(token, tgtDate, fileId);
+// }
 
 // Path of folder for rosters: SXSW MASTER -> <year> -> Rosters -> Daily
 
