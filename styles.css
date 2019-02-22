@@ -14,3 +14,20 @@ button {
 #datePick {
 	width: 400px;
 }
+
+#datepicker {
+    width: 150px;
+}
+
+#error {
+    color: red;
+    font-weight: bold;
+}
+
+.link {
+    font-weight: bold;
+}
+
+#revokeAuth {
+    display: none;
+}

@@ -190,6 +190,18 @@ function getDateStr(date) {
     return year + month + day;
 }
 
+// Return date object from date picker
+function getDate() {
+    var picker = document.getElementById('datepicker');
+    if (picker.value !== '') {
+        let date = picker.valueAsDate;
+        // Fix for timezone weirdness
+        date.setMinutes(date.getTimezoneOffset() + date.getMinutes());
+        return date;
+    }
+    return null;
+}
+
 // Display current auth status for Drive in UI
 function showDriveAuthDetails(interactive) {
     getDriveToken(interactive, function(token) {
@@ -251,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset link field
         document.getElementById('link').innerHTML = '';
         // Check for a valid date
-        var date = $('#datepicker').datepicker( "getDate" );
+        var date = getDate();
         if (date != null) {
             // Generate the report
             generateReport(date);
@@ -273,9 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         revokeDriveAuth();
     });
 
-    // Initalize date picker
-    $('#datepicker').datepicker();
-
     // Initailize Vol-Score link button
     document.getElementById('genLinks').addEventListener('click', () => {
         if (running) {
@@ -287,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset link field
         document.getElementById('link').innerHTML = '';
         // Check for a valid date
-        var date = $('#datepicker').datepicker( "getDate" );
+        var date = getDate();
         if (date != null) {
             // Generate the links!
             generateLinksForDate(date);

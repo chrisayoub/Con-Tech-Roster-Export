@@ -7,11 +7,6 @@
     <script src="drive.js"></script>
     <script src="dataProcess.js"></script>
     <script src="event.js"></script>
-    
-    <!-- Used for date picker -->
-    <link rel="stylesheet" href="jquery-ui.min.css">
-    <script src="jquery.min.js"></script>
-    <script src="jquery-ui.min.js"></script>
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="styles.css">
@@ -29,22 +24,22 @@
       You may change the current account if needed by clicking 'Logout'.</p>
 
       <button id="driveAuthBtn">Login</button>
-      <button id="revokeAuth" style="display: none">Logout</button>
+      <button id="revokeAuth">Logout</button>
     </div>
     
     <div id="datePick">
       <p>Now, select your date of roster export.</p>
-      <input type="text" id="datepicker" style="width: 100px">
+      <input id="datepicker" type="date"/>
       <button id="export">Export Rosters</button> 
     </div>   
 
-    <p id="error" style="color: red; font-weight: bold;"></p>
-    <p id="link" style="font-weight: bold;"></p>
+    <p id="error"></p>
+    <p class="link" id="link"></p>
 
     <h1><b>------------------</b></h1>
 
     <p>Click this button after selecting a date to generate customized vol-scoring links for SL / Ninjas:</p>
     <button id="genLinks">Generate Vol Score Links</button> 
-    <p id="volScoreLink" style="font-weight: bold;"></p>
+    <p class="link" id="volScoreLink"></p>
   </body>
 </html>
