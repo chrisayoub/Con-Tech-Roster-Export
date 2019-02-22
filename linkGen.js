@@ -8,34 +8,30 @@ function generateLinkSpreadsheet(reportData, tgtDate) {
 
 // Returns the location name for the form
 function mapLoc(location) {
-    var locSplitDash = location.split(' - ')[0];
-    var locSplit = location.split(' ')[0];
-    // ACC - Zone A -> ACC
+    // <shiftboard venue> -> <google form venue>
+
+    // ACC -> ACC
     // Courtyard Marriott Downtown -> Courtyard
-    // Driskill Hotel -> Driskill
-    // Fairmont - Zone A -> Fairmont
-    // Four Seasons -> Four Seasons
-    // Hilton - Zone A -> Hilton
-    // JW Marriott - Zone A -> JW Marriott
-    // Palmer Events Center -> Palmer
+    // Fairmont Hotel -> Fairmont
+    // Hilton Downtown -> Hilton
     // Westin -> Westin
 
-    if (locSplitDash === 'ACC') {
-        return 'ACC';
-    } else if (locSplit === 'Courtyard') {
-        return 'Courtyard'
-    } else if (locSplit === 'Driskill') {
-        return 'Driskill';
-    } else if (locSplitDash === 'Fairmont') {
-        return 'Fairmont';
-    } else if (locSplitDash === 'Hilton') {
-        return 'Hilton';
-    } else if (locSplitDash === 'JW Marriott') {
-        return 'JW Marriott';
-    } else if (locSplit === 'Palmer') {
-        return 'Palmer';
+    // * Four Seasons -> Four Seasons
+    // * JW Marriott -> JW Marriott
+    // ** Line Austin -> The LINE
+
+    var firstWord = location.split(' ')[0];
+
+    var singleWordVenues = ['ACC', 'Courtyard', 'Fairmont', 'Hilton', 'Westin'];
+    if (singleWordVenues.includes(firstWord)) {
+        return firstWord;
+    } else if (location === 'Line Austin') {
+        // Strange exception: The LINE
+        return 'The LINE';
+    } else {
+        // Four Seasons, JW Marriott
+        return location;
     }
-    return location; // Westin, Four Seasons
 }
 
 // Get list of links from matrix
